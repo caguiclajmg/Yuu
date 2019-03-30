@@ -1,0 +1,26 @@
+{
+  "name": "yuu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caguiclajmg/Yuu.git"
+  },
+  "author": "John Mark Gabriel Caguicla",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/caguiclajmg/Yuu/issues"
+  },
+  "homepage": "https://github.com/caguiclajmg/Yuu#readme",
+  "dependencies": {
+    "gif-frames": "^1.0.1",
+    "gui": "^0.6.3",
+    "jimp": "^0.6.1",
+    "memory-streams": "^0.1.3",
+    "promisepipe": "^3.0.0"
+  }
+}
