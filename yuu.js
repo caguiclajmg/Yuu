@@ -23,7 +23,7 @@ async function processFrame(frame, options) {
     }
 
     if(options.chromaKey) {
-        const key = options.chromaKey.colorKey;
+        const key = options.chromaKey.key;
         const tolerance = options.chromaKey.tolerance;
 
         image.scan(0, 0, image.bitmap.width, image.bitmap.height, (x, y, idx) => {
@@ -92,9 +92,9 @@ async function main() {
         cumulative: true,
         asyncLoad: true,
         progressHandler: (status) => console.log(`${status.current}/${status.count}`),
-        size: {
-            width: 100,
-            height: 100,
+        chromaKey: {
+            key: {r: 0, g: 255, b: 0},
+            tolerance: 0.30,
         },
     });
     const frames = image.frames;
@@ -115,7 +115,28 @@ async function main() {
     tmiExit.onClick = (self) => {
         process.exit(0);
     };
-    const menu = gui.Menu.create([tmiFrame, tmiExit]);
+    const tmiScale1 = gui.MenuItem.create({
+        type: 'radio',
+        label: '1x',
+        checked: true,
+    });
+    tmiScale1.onClick = (self) => {
+        window.setContentSize({
+            width: image.size.width,
+            height: image.size.height,
+        });
+    };
+    const tmiScale2 = gui.MenuItem.create({
+        type: 'radio',
+        label: '2x',
+    });
+    tmiScale2.onClick = (self) => {
+        window.setContentSize({
+            width: image.size.width * 2,
+            height: image.size.height * 2,
+        });
+    };
+    const menu = gui.Menu.create([tmiScale1, tmiScale2, tmiFrame, tmiExit]);
 
     let velocity = {
         x: 16 + Math.floor(Math.random() * 16) * (Math.random() <= 0.5 ? 1 : -1),
