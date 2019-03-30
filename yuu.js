@@ -47,15 +47,27 @@ async function loadImage(path, options) {
         cumulative: options.cumulative,
     });
 
-    const frames = new Array(frameData.length);
+    let progress = 0;
 
+    const frames = new Array(frameData.length);
     const promises = Promise.all(frameData.map(async (frame, index) => {
         frames[index] = await processFrame(frame, options);
+
+        if(options.progressHandler) options.progressHandler({
+            current: ++progress,
+            count: frames.length,
+        });
     }));
 
     if(!options.asyncLoad) await promises;
 
-    return frames;
+    return {
+        size: {
+            width: frameData[0].frameInfo.width,
+            height: frameData[0].frameInfo.height,
+        },
+        frames: frames,
+    };
 }
 
 async function main() {
@@ -68,10 +80,12 @@ async function main() {
     });
     window.onClose = () => gui.MessageLoop.quit();
 
-    const frames = await loadImage(imagePath, {
-        cumulative: false,
+    const image = await loadImage(imagePath, {
+        cumulative: true,
         asyncLoad: true,
+        progressHandler: (status) => console.log(`${status.current}/${status.count}`)
     });
+    const frames = image.frames;
 
     let frame = 0;
 
@@ -106,7 +120,7 @@ async function main() {
         if(!held) {
             const bounds = window.getBounds();
 
-            if(bounds.x <= -bounds.width) {
+            /*if(bounds.x <= -bounds.width) {
                 bounds.x = 1440;
                 velocity.x = 16 + Math.floor(Math.random() * 16) * (Math.random() <= 0.5 ? 1 : -1);
             } else {
@@ -117,7 +131,7 @@ async function main() {
                 velocity.x = 16 + Math.floor(Math.random() * 16) * (Math.random() <= 0.5 ? 1 : -1);
             } else {
                 bounds.x += velocity.x;
-            }
+            }*/
             /*if(bounds.y <= -bounds.height) {
                 bounds.y = 900;
                 velocity.y = 8 + Math.floor(Math.random() * 32) * (Math.random() <= 0.5 ? 1 : -1);
@@ -145,8 +159,8 @@ async function main() {
 
     window.setAlwaysOnTop(true);
     window.setContentSize({
-        width: frames[0].getSize().width / 2,
-        height: frames[0].getSize().height / 2,
+        width: image.size.width,
+        height: image.size.height,
     });
     window.setContentView(container);
     window.center();
@@ -154,7 +168,9 @@ async function main() {
 
     setInterval(() => {
         container.schedulePaint();
-    }, 100);
+    }, 50);
+
+    console.log('window is created!');
 
     if(!process.versions.yode) {
         gui.MessageLoop.run();
