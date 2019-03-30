@@ -101,7 +101,6 @@ async function main() {
         if(!held) {
             const bounds = window.getBounds();
 
-            console.log(`${bounds.x},${bounds.y}`);
             if(bounds.x <= -bounds.width) {
                 bounds.x = 1440;
                 velocity.x = 16 + Math.floor(Math.random() * 16) * (Math.random() <= 0.5 ? 1 : -1);
