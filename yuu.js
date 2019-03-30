@@ -53,8 +53,10 @@ async function loadImage(path, options) {
     const promises = Promise.all(frameData.map(async (frame, index) => {
         frames[index] = await processFrame(frame, options);
 
+        progress++;
+
         if(options.progressHandler) options.progressHandler({
-            current: ++progress,
+            current: progress,
             count: frames.length,
         });
     }));
@@ -63,6 +65,7 @@ async function loadImage(path, options) {
 
     return {
         size: {
+            // TODO: Find a better place to get the image dimensions
             width: frameData[0].frameInfo.width,
             height: frameData[0].frameInfo.height,
         },
