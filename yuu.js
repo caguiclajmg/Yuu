@@ -34,7 +34,28 @@ async function processFrame(frame, options) {
         });
     }
 
-    return await image.getBufferAsync(jimp.MIME_PNG);
+    return gui.Image.createFromBuffer(await image.getBufferAsync(jimp.MIME_PNG));
+}
+
+async function loadImage(path, options) {
+    options = options || {};
+
+    const frameData = await gifFrames({
+        url: path,
+        frames: (options.start && options.end) ?  `${options.start}-${options.end}` : 'all',
+        outputType: 'png',
+        cumulative: options.cumulative,
+    });
+
+    const frames = new Array(frameData.length);
+
+    if(!options.asyncLoad) {
+        await Promise.all(frameData.map(async (frame, index) => {
+            frames[index] = await processFrame(frame);
+        }));
+    }
+
+    return frames;
 }
 
 async function main() {
