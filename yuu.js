@@ -15,13 +15,11 @@ async function processFrame(frame, options) {
     const ws = new memoryStreams.WritableStream();
     await promisepipe(stream, ws);
 
-    let buffer = ws.toBuffer();
+    const image = await jimp.read(ws.toBuffer());
 
     if(options.chromaKey) {
         const key = options.chromaKey.colorKey;
         const tolerance = options.chromaKey.tolerance;
-
-        const image = await jimp.read(buffer);
 
         image.scan(0, 0, image.bitmap.width, image.bitmap.height, (x, y, idx) => {
             const pixel = {
@@ -34,11 +32,9 @@ async function processFrame(frame, options) {
 
             if(distance <= tolerance) image.setPixelColor(jimp.rgbaToInt(pixel.r, pixel.g, pixel.b, 0), x, y);
         });
-
-        buffer = await image.getBufferAsync(jimp.MIME_PNG);
     }
 
-    return buffer;
+    return await image.getBufferAsync(jimp.MIME_PNG);
 }
 
 async function main() {
