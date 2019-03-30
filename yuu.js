@@ -15,7 +15,12 @@ async function processFrame(frame, options) {
     const ws = new memoryStreams.WritableStream();
     await promisepipe(stream, ws);
 
-    const image = await jimp.read(ws.toBuffer());
+    let image = await jimp.read(ws.toBuffer());
+
+    if(options.size) {
+        if(!options.size.width && !options.size.height) throw new Error('Image width and height cannot be both blank');
+        image.resize(options.size.width || jimp.AUTO, options.size.height || jimp.AUTO);
+    }
 
     if(options.chromaKey) {
         const key = options.chromaKey.colorKey;
@@ -86,7 +91,11 @@ async function main() {
     const image = await loadImage(imagePath, {
         cumulative: true,
         asyncLoad: true,
-        progressHandler: (status) => console.log(`${status.current}/${status.count}`)
+        progressHandler: (status) => console.log(`${status.current}/${status.count}`),
+        size: {
+            width: 100,
+            height: 100,
+        },
     });
     const frames = image.frames;
 
