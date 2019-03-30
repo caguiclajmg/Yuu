@@ -34,7 +34,7 @@ async function processFrame(frame, options) {
         });
     }
 
-    return gui.Image.createFromBuffer(await image.getBufferAsync(jimp.MIME_PNG));
+    return gui.Image.createFromBuffer(await image.getBufferAsync(jimp.MIME_PNG), 1);
 }
 
 async function loadImage(path, options) {
@@ -49,11 +49,11 @@ async function loadImage(path, options) {
 
     const frames = new Array(frameData.length);
 
-    if(!options.asyncLoad) {
-        await Promise.all(frameData.map(async (frame, index) => {
-            frames[index] = await processFrame(frame);
-        }));
-    }
+    const promises = Promise.all(frameData.map(async (frame, index) => {
+        frames[index] = await processFrame(frame);
+    }));
+
+    if(!options.asyncLoad) await promises;
 
     return frames;
 }
@@ -68,22 +68,10 @@ async function main() {
     });
     window.onClose = () => gui.MessageLoop.quit();
 
-    const frameData = await gifFrames({
-        url: imagePath,
-        frames: 'all',
-        outputType: 'png',
+    const frames = await loadImage(imagePath, {
         cumulative: false,
     });
-
-    const frames = new Array(frameData.length);
-    await Promise.all(frameData.map((frame, index) => {
-        return processFrame(frame).then((buffer) => {
-            console.log(`${index}`);
-            frames[index] = gui.Image.createFromBuffer(buffer, 1);
-        });
-    }));
-
-    if(!frames) process.exit(0);
+    if(!frames.length) process.exit(0);
 
     let frame = 0;
 
