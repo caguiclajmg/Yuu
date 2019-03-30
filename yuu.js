@@ -70,8 +70,8 @@ async function main() {
 
     const frames = await loadImage(imagePath, {
         cumulative: false,
+        asyncLoad: true,
     });
-    if(!frames.length) process.exit(0);
 
     let frame = 0;
 
@@ -101,7 +101,7 @@ async function main() {
     container.setMouseDownCanMoveWindow(true);
     container.onDraw = (self, painter) => {
         if(++frame >= frames.length) frame = 0;
-        painter.drawImage(frames[frame], window.getContentSize());
+        if(frames[frame]) painter.drawImage(frames[frame], window.getContentSize());
 
         if(!held) {
             const bounds = window.getBounds();
