@@ -50,7 +50,7 @@ async function loadImage(path, options) {
     const frames = new Array(frameData.length);
 
     const promises = Promise.all(frameData.map(async (frame, index) => {
-        frames[index] = await processFrame(frame);
+        frames[index] = await processFrame(frame, options);
     }));
 
     if(!options.asyncLoad) await promises;
