@@ -8,6 +8,14 @@ const promisepipe = require('promisepipe');
 const memoryStreams = require('memory-streams');
 const jimp = require('jimp');
 
+function rgbToYCbCr(r, g, b) {
+    return {
+        y: 16 + ((65.738 / 256) * r) + ((129.057 / 256) * g) + ((25.064 / 256) * b),
+        cb: 128 - ((37.945 / 256) * r) - ((74.494 / 256) * g) + ((112.439 / 256) * b),
+        cr: 128 + ((112.439 / 256) * r) - ((94.154 / 256) * g) - ((18.285 / 256) * b),
+    };
+}
+
 async function processImage(frame, options) {
     options = options || {};
 
@@ -33,7 +41,7 @@ async function processImage(frame, options) {
                 b: image.bitmap.data[idx + 2],
                 a: image.bitmap.data[idx + 3],
             };
-            const distance = Math.sqrt(Math.pow(pixel.r - key.r, 2) + Math.pow(pixel.g - key.g, 2) + Math.pow(pixel.b - key.b, 2)) / Math.sqrt(Math.pow(255, 2) * 3);
+            const distance = (Math.abs(pixel.r - key.r) + Math.abs(pixel.g - key.g) + Math.abs(pixel.b - key.b)) / (255 * 3);
 
             if (distance <= tolerance) image.setPixelColor(jimp.rgbaToInt(pixel.r, pixel.g, pixel.b, 0), x, y);
         });
