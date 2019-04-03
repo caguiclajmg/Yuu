@@ -4,8 +4,6 @@
 
 const gui = require('gui');
 const gifFrames = require('gif-frames');
-const promisepipe = require('promisepipe');
-const memoryStreams = require('memory-streams');
 const jimp = require('jimp');
 
 function rgbToYCbCr(r, g, b) {
@@ -16,14 +14,10 @@ function rgbToYCbCr(r, g, b) {
     };
 }
 
-async function processImage(frame, options) {
+async function processImage(stream, options) {
     options = options || {};
 
-    const stream = frame.getImage();
-    const ws = new memoryStreams.WritableStream();
-    await promisepipe(stream, ws);
-
-    let image = await jimp.read(ws.toBuffer());
+    let image = await jimp.read(stream);
 
     if (options.size) {
         if (!options.size.width && !options.size.height) throw new Error('Image width and height cannot be both blank');
@@ -43,7 +37,7 @@ async function processImage(frame, options) {
             };
             const distance = (Math.abs(pixel.r - key.r) + Math.abs(pixel.g - key.g) + Math.abs(pixel.b - key.b)) / (255 * 3);
 
-            if (distance <= tolerance) image.setPixelColor(jimp.rgbaToInt(pixel.r, pixel.g, pixel.b, 0), x, y);
+            if (distance <= tolerance) image.bitmap.data[idx + 3] = 0;
         });
     }
 
@@ -64,7 +58,7 @@ async function loadGIF(path, options) {
 
     const frames = new Array(frameData.length);
     const promises = Promise.all(frameData.map(async (frame, index) => {
-        frames[index] = gui.Image.createFromBuffer(await processImage(frame, options), 1);
+        frames[index] = gui.Image.createFromBuffer(await processImage(frame.getImage(), options), 1);
 
         progress++;
 
