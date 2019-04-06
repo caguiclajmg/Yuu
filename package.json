@@ -18,6 +18,7 @@
   "homepage": "https://github.com/caguiclajmg/Yuu#readme",
   "dependencies": {
     "gif-frames": "^1.0.1",
+    "gifencoder": "^2.0.1",
     "gui": "^0.6.3",
     "jimp": "^0.6.1"
   }
