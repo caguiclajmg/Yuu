@@ -14,10 +14,10 @@ function rgbToYCbCr(r, g, b) {
     };
 }
 
-async function processImage(stream, options) {
+async function processImage(bufer, options) {
     options = options || {};
 
-    let image = await jimp.read(stream);
+    const image = await jimp.read(bufer);
 
     if (options.size) {
         if (!options.size.width && !options.size.height) throw new Error('Image width and height cannot be both blank');
@@ -35,7 +35,7 @@ async function processImage(stream, options) {
                 b: image.bitmap.data[idx + 2],
                 a: image.bitmap.data[idx + 3],
             };
-            const distance = (Math.abs(pixel.r - key.r) + Math.abs(pixel.g - key.g) + Math.abs(pixel.b - key.b)) / (255 * 3);
+            const distance = (Math.abs(pixel.r - key.r) + Math.abs(pixel.g - key.g) + Math.abs(pixel.b - key.b)) / 765;
 
             if (distance <= tolerance) image.bitmap.data[idx + 3] = 0;
         });
@@ -53,12 +53,13 @@ async function loadGIF(path, options) {
         outputType: 'png',
         cumulative: options.cumulative,
     });
+    frameData.sort((a, b) => a.frameIndex - b.frameIndex);
 
     let progress = 0;
 
     const frames = new Array(frameData.length);
-    const promises = Promise.all(frameData.map(async (frame, index) => {
-        frames[index] = gui.Image.createFromBuffer(await processImage(frame.getImage(), options), 1);
+    await Promise.all(frameData.map(async (frame) => {
+        frames[frame.frameIndex] = gui.Image.createFromBuffer(await processImage(frame.getImage(), options), 1);
 
         progress++;
 
@@ -67,8 +68,6 @@ async function loadGIF(path, options) {
             count: frames.length,
         });
     }));
-
-    if (!options.asyncLoad) await promises;
 
     return {
         size: {
