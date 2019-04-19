@@ -2,7 +2,6 @@
     <h1>Yuu</h1>
     <h4>Bringing cuteness to your desktop</h4>
     <img src="docs/preview.gif" width="75%" />
-    <h6>Image: 私に天使が舞い降りた！ / Wataten! An Angel Flew Down to Me</h6>
 </div>
 
 ## Usage
