@@ -1,9 +1,12 @@
 const Yue = require('gui');
 
+const inputSlider = require('./input_slider.js');
+
 class Window {
     constructor(options) {
         options = options || {};
 
+        this.setPaintInterval = this.setPaintInterval.bind(this);
         this._draw = this._draw.bind(this);
 
         this.frame = 0;
@@ -14,47 +17,19 @@ class Window {
             transparent: true,
         });
 
-        this.setSize({width: 100, height: 100});
-
         this.container = Yue.Container.create();
 
-        this.scaleMenuQuarter = Yue.MenuItem.create({
-            type: 'radio',
-            label: '0.25x',
-        });
-        this.scaleMenuQuarter.onClick = () => this.window.setContentSize({width: this.size.width * 0.25, height: this.size.height * 0.25});
-
-        this.scaleMenuHalf = Yue.MenuItem.create({
-            type: 'radio',
-            label: '0.5x',
-        });
-        this.scaleMenuHalf.onClick = () => this.window.setContentSize({width: this.size.width * 0.5, height: this.size.height * 0.5});
-
-        this.scaleMenuNormal = Yue.MenuItem.create({
-            type: 'radio',
-            label: '1x',
-            checked: true,
-        });
-        this.scaleMenuNormal.onClick = () => this.window.setContentSize(this.size);
-
-        this.scaleMenuDouble = Yue.MenuItem.create({
-            type: 'radio',
-            label: '2x',
-        });
-        this.scaleMenuDouble.onClick = () => this.window.setContentSize({width: this.size.width * 2, height: this.size.height * 2});
-
-        this.scaleMenu = Yue.Menu.create([
-            this.scaleMenuQuarter,
-            this.scaleMenuHalf,
-            this.scaleMenuNormal,
-            this.scaleMenuDouble,
-        ]);
-
         this.scale = Yue.MenuItem.create({
-            type: 'submenu',
+            type: 'label',
             label: 'Scale',
-            submenu: this.scaleMenu,
         });
+        this.scale.onClick = () => inputSlider('Scale:', 'Yuu', 0.1, 4, 0.1, 1, (scale) => this.setScale(scale));
+
+        this.interval = Yue.MenuItem.create({
+            type: 'label',
+            label: 'Speed'
+        });
+        this.interval.onClick = () => inputSlider('Interval:', 'Yuu', 1, 500, 1, this.interval, (interval) => this.setPaintInterval(interval));
 
         this.exit = Yue.MenuItem.create({
             type: 'label',
@@ -62,20 +37,28 @@ class Window {
         });
         this.exit.onClick = () => this.close();
 
-        this.contextMenu = Yue.Menu.create([this.scale, this.exit]);
+        this.contextMenu = Yue.Menu.create([this.scale, this.interval, this.exit]);
 
         this.container.onMouseDown = (self, event) => {
             if(event.button === 2) this.contextMenu.popup();
         };
         this.container.onDraw = this._draw;
 
+        this.setSize({width: 1, height: 1});
+
         this.window.setContentView(this.container);
         this.window.onClose = () => this._unload();
         this.window.center();
 
-        setInterval(() => {
+        this.setPaintInterval(33);
+    }
+
+    setPaintInterval(interval) {
+        if(this.timer) clearInterval(this.timer);
+        this.interval = interval;
+        this.timer = setInterval(() => {
             this.container.schedulePaint();
-        }, 33);
+        }, this.interval);
     }
 
     show() {
@@ -88,7 +71,18 @@ class Window {
 
     setImage(image) {
         this.image = image;
+        this.imageSize = this.image.size;
+        this.setSize(this.imageSize);
     }
+
+    setScale(scale) {
+        this.setSize({
+            width: this.imageSize.width * scale,
+            height: this.imageSize.height * scale
+        });
+    }
+
+    getSize() { return this.size; }
 
     setSize(size) {
         if(!size) return;
