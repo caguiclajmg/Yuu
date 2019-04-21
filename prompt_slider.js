@@ -1,6 +1,6 @@
 const Yue = require('gui');
 
-function inputSlider(prompt, title, min, max, step, value, callback) {
+function promptSlider(prompt, title, min, max, step, value, callback) {
     const window = Yue.Window.create({});
     window.setTitle(title);
 
@@ -37,4 +37,4 @@ function inputSlider(prompt, title, min, max, step, value, callback) {
     window.activate();
 }
 
-module.exports = exports = inputSlider;
+module.exports = exports = promptSlider;

@@ -1,6 +1,6 @@
 const Yue = require('gui');
 
-const inputSlider = require('./input_slider.js');
+const promptSlider = require('./prompt_slider.js');
 
 class Window {
     constructor(options) {
@@ -23,13 +23,13 @@ class Window {
             type: 'label',
             label: 'Scale',
         });
-        this.scale.onClick = () => inputSlider('Scale:', 'Yuu', 0.1, 4, 0.1, 1, (scale) => this.setScale(scale));
+        this.scale.onClick = () => promptSlider('Scale:', 'Yuu', 0.1, 4, 0.1, 1, (scale) => this.setScale(scale));
 
         this.interval = Yue.MenuItem.create({
             type: 'label',
             label: 'Speed'
         });
-        this.interval.onClick = () => inputSlider('Interval:', 'Yuu', 1, 500, 1, this.interval, (interval) => this.setPaintInterval(interval));
+        this.interval.onClick = () => promptSlider('Interval:', 'Yuu', 1, 500, 1, this.interval, (interval) => this.setPaintInterval(interval));
 
         this.exit = Yue.MenuItem.create({
             type: 'label',
